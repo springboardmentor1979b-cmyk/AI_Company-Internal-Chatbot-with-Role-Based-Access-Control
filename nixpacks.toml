@@ -1,0 +1,15 @@
+[phases.setup]
+nixPkgs = ["python311"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[phases.build]
+cmds = [
+  "python -m backend.init_users",
+  "python -m preprocessing.preprocess_all",
+  "python -m vector_db.embedding_engine"
+]
+
+[start]
+cmd = "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"

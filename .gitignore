@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+chroma_storage/
+backend/users.db
+*.riv
+.pytest_cache/
+rbacchatbot_fixed/
+rbacchatbot_fixed.zip
+dragon-intel-complete.zip
+.env

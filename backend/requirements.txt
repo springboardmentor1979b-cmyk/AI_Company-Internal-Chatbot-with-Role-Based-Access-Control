@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+chromadb
+pydantic<2
+sentence-transformers
+python-dotenv
+passlib[bcrypt]
+python-jose
