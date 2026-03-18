@@ -132,3 +132,13 @@ def list_uploads(user=Depends(get_current_user)):
                 for fname in os.listdir(dp):
                     files.append({"department": dept, "filename": fname})
     return {"files": files}
+
+@app.on_event("startup")
+def startup_event():
+    init_audit_table()
+    
+    # ✅ Run preprocessing + embedding here
+    import subprocess
+    subprocess.run(["python", "-m", "backend.init_users"])
+    subprocess.run(["python", "-m", "preprocessing.preprocess_all"])
+    subprocess.run(["python", "-m", "vector_db.embedding_engine"])
