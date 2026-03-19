@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     pip install --no-cache-dir "chromadb[embedding-functions]"
 
+ARG CACHEBUST=1
 COPY . .
 
 RUN python -m backend.init_users && \
