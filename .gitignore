@@ -7,5 +7,5 @@ backend/users.db
 .pytest_cache/
 rbacchatbot_fixed/
 rbacchatbot_fixed.zip
-dragon-intel-complete.zip
-.env
+new_app.py
+app.py
