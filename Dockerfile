@@ -5,10 +5,26 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y gcc g++ && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y gcc g++ && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     pip install --no-cache-dir "chromadb[embedding-functions]"
 
+COPY . .
+
+# ✅ Removed embedding from build
+
+# ✅ Run at startup instead
+CMD bash -c "python -m backend.init_users && \
+             python -m preprocessing.preprocess_all && \
+             python -m vector_db.embedding_engine && \
+             uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"
 ARG CACHEBUST=1
 COPY . .
 

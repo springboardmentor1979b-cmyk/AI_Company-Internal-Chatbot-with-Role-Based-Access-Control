@@ -52,4 +52,4 @@ def embed_documents():
 
 if __name__ == "__main__":
     embed_documents()
-"@ | Out-File -FilePath "D:\python\company-chatbot-rbac\vector_db\embedding_engine.py" -Encoding utf8
+
