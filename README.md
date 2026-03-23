@@ -86,18 +86,6 @@ CEO User → "financial report" → ✅ Full Access
 
 ---
 
-## 📂 Project Structure
-
-backend/  
-frontend/  
-data/  
-vector_db/  
-main.py  
-app.py  
-requirements.txt  
-
----
-
 ## 🚀 How to Run
 
 1. Install dependencies  
