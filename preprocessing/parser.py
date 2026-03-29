@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import PyPDF2
 
 
 def parse_markdown(file_path: str) -> str:
@@ -40,3 +41,22 @@ def parse_csv(file_path: str) -> str:
 
     except Exception as e:
         raise Exception(f"Error reading CSV file {file_path}: {str(e)}")
+
+def parse_pdf(file_path: str) -> str:
+    """
+    Parse a PDF file and return cleaned text.
+    """
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"PDF file not found: {file_path}")
+
+    try:
+        text = ""
+        with open(file_path, "rb") as file:
+            reader = PyPDF2.PdfReader(file)
+            for page in reader.pages:
+                extracted = page.extract_text()
+                if extracted:
+                    text += extracted + "\n"
+        return text.strip()
+    except Exception as e:
+        raise Exception(f"Error reading PDF file {file_path}: {str(e)}")

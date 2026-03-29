@@ -6,7 +6,7 @@ from uuid import uuid4
 from typing import List, Dict
 from datetime import datetime
 
-from preprocessing.parser import parse_markdown, parse_csv
+from preprocessing.parser import parse_markdown, parse_csv, parse_pdf
 from preprocessing.chunker import clean_text, chunk_text
 from preprocessing.metadata import create_metadata
 
@@ -33,6 +33,9 @@ logging.basicConfig(
 def generate_content_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
+def simple_parse_txt(file_path: str) -> str:
+    with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+        return f.read()
 
 # ---------------------------------------
 # MAIN PROCESSOR
@@ -48,18 +51,15 @@ def process_documents() -> List[Dict]:
 
     logging.info("Starting document ingestion process...")
 
-    for department in os.listdir(DATA_FOLDER):
-
-        department_path = os.path.join(DATA_FOLDER, department)
-
-        if not os.path.isdir(department_path):
-            continue
-
-        logging.info(f"Processing department: {department}")
-
-        for filename in os.listdir(department_path):
-
-            file_path = os.path.join(department_path, filename)
+    for root, dirs, files in os.walk(DATA_FOLDER):
+        for filename in files:
+            file_path = os.path.join(root, filename)
+            
+            parent_dir = os.path.basename(os.path.dirname(file_path))
+            if parent_dir in ["data", "uploads"]:
+                department = "general"
+            else:
+                department = parent_dir
 
             try:
                 # --------------------------
@@ -68,9 +68,14 @@ def process_documents() -> List[Dict]:
                 if filename.endswith(".md"):
                     raw_text = parse_markdown(file_path)
 
+                elif filename.endswith(".txt"):
+                    raw_text = simple_parse_txt(file_path)
+
                 elif filename.endswith(".csv"):
                     raw_text = parse_csv(file_path)
 
+                elif filename.endswith(".pdf"):
+                    raw_text = parse_pdf(file_path)
                 else:
                     logging.warning(f"Unsupported file type skipped: {filename}")
                     continue
@@ -89,7 +94,7 @@ def process_documents() -> List[Dict]:
                 # --------------------------
                 chunks = chunk_text(cleaned_text)
 
-                logging.info(f"{len(chunks)} chunks created from {filename}")
+                logging.info(f"{len(chunks)} chunks created from {filename} (Dept: {department})")
 
                 # --------------------------
                 # PROCESS EACH CHUNK
@@ -103,7 +108,7 @@ def process_documents() -> List[Dict]:
 
                     seen_hashes.add(content_hash)
 
-                    chunk_id = str(uuid4())
+                    chunk_id = content_hash
 
                     metadata = create_metadata(
                         chunk_id=chunk_id,

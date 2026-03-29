@@ -8,9 +8,13 @@ from sqlalchemy.orm import Session
 from .database import SessionLocal
 from .models import User
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "dragon-rbac-supersecret-2030")
-ALGORITHM = "HS256"
+_DEFAULT_KEY = "dragon-rbac-supersecret-2030"
+SECRET_KEY   = os.environ.get("SECRET_KEY", _DEFAULT_KEY)
+ALGORITHM    = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 8
+
+if SECRET_KEY == _DEFAULT_KEY:
+    print("⚠️  WARNING: Using default SECRET_KEY — set SECRET_KEY env variable in production!")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
@@ -49,7 +53,11 @@ def get_current_user(
             raise exc
     except JWTError:
         raise exc
+
     user = db.query(User).filter(User.username == username).first()
     if not user:
         raise exc
+    # Respect is_active flag if column exists
+    if hasattr(user, "is_active") and not user.is_active:
+        raise HTTPException(status_code=403, detail="Account is disabled.")
     return user

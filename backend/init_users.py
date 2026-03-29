@@ -88,12 +88,12 @@ def init_db():
     print(f"✅ Tables created: users, query_logs, chat_history")
     print(f"✅ {inserted} new users inserted (duplicates skipped)")
     print("\n── Login credentials ──────────────────────")
-    print("  admin          / admin123       / C-Level  / CEO-2030")
-    print("  ceo_user       / ceo123         / C-Level  / CEO-2030")
+    print("  admin          / admin123       / C-Level  / ADMIN-2030")
+    print("  ceo_user       / ceo123         / C-Level  / ADMIN-2030")
     print("  finance_user   / finance123     / Finance  / FIN-2030")
-    print("  hr_user        / hr123          / HR       / HRM-2030")
+    print("  hr_user        / hr123          / HR       / HR-2030")
     print("  marketing_user / marketing123   / Marketing/ MKT-2030")
-    print("  engineering_user/engineering123 / Engineering/ENG-2030")
+    print("  engineering_user/engineering123 / Engineering/ ENG-2030")
     print("  employee_user  / employee123    / Employee / EMP-2030")
 
 

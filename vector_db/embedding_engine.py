@@ -20,19 +20,25 @@ def embed_documents():
     print(f"Connecting to ChromaDB...")
     client = chromadb.PersistentClient(path=CHROMA_PATH)
     ef = SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
-    try:
-        client.delete_collection("company_documents")
-    except Exception:
-        pass
-    collection = client.create_collection(
+    collection = client.get_or_create_collection(
         name="company_documents",
         embedding_function=ef,
         metadata={"hnsw:space": "cosine"}
     )
-    print(f"Embedding {len(chunks)} chunks...")
+    
+    existing_result = collection.get(include=[])
+    existing_ids = set(existing_result.get("ids", [])) if existing_result else set()
+
+    new_chunks = [c for c in chunks if c["id"] not in existing_ids]
+
+    if not new_chunks:
+        print("No new chunks to embed.")
+        return
+
+    print(f"Embedding {len(new_chunks)} new chunks (out of {len(chunks)} total)...")
     batch_size = 16
-    for i in range(0, len(chunks), batch_size):
-        batch = chunks[i:i + batch_size]
+    for i in range(0, len(new_chunks), batch_size):
+        batch = new_chunks[i:i + batch_size]
         texts = [c["text"] for c in batch]
         metas = []
         for c in batch:
@@ -46,7 +52,7 @@ def embed_documents():
             documents=texts,
             metadatas=metas
         )
-        print(f"  Embedded {min(i+batch_size, len(chunks))}/{len(chunks)} chunks")
+        print(f"  Embedded {min(i+batch_size, len(new_chunks))}/{len(new_chunks)} chunks")
     print(f"Done - {collection.count()} chunks stored in ChromaDB.")
 
 

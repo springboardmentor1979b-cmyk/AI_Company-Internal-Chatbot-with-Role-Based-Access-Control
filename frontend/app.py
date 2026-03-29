@@ -2,9 +2,10 @@ import streamlit as st
 import requests
 import base64
 import json
+import os
 from datetime import datetime
 
-API = "http://127.0.0.1:8000"
+API = os.environ.get("API_URL", "http://127.0.0.1:8000")
 
 st.set_page_config(
     page_title="DRAGON — Intelligence",
@@ -328,10 +329,6 @@ hr{border-color:var(--border)!important;margin:0.75rem 0!important;}
 # ROLE CONFIG
 # ══════════════════════════════════════════
 ROLES = ["Finance","HR","Marketing","Engineering","Employee","C-Level"]
-ROLE_KEYS = {
-    "Finance":"FIN-2030","HR":"HRM-2030","Marketing":"MKT-2030",
-    "Engineering":"ENG-2030","Employee":"EMP-2030","C-Level":"CEO-2030"
-}
 ROLE_COLORS = {
     "Finance":"#36d399","HR":"#f97316","Marketing":"#c084fc",
     "Engineering":"#4fc3f7","Employee":"#94a3b8","C-Level":"#fbbf24","Admin":"#fbbf24"
@@ -549,43 +546,29 @@ if not st.session_state["token"]:
                     st.rerun()
             with col_enter:
                 if st.button("🐉 Enter System", type="primary", use_container_width=True, key="step2_btn"):
-                    expected = ROLE_KEYS.get(sel_role,"")
-                    if passkey != expected:
-                        st.error(f"⚠ Invalid access key for {sel_role}.")
-                    else:
-                        st.session_state.update({
-                            "token": st.session_state["_temp_token"],
-                            "username": st.session_state["_temp_user"],
-                            "role": st.session_state["_temp_role"],
-                            "login_step": 1,
-                            "page": "chat"
-                        })
-                        st.rerun()
+                    try:
+                        r = requests.post(
+                            f"{API}/verify-role-key", 
+                            params={"role_key": passkey},
+                            headers={"Authorization": f"Bearer {st.session_state['_temp_token']}"}
+                        )
+                        if r.status_code == 200:
+                            st.session_state.update({
+                                "token": st.session_state["_temp_token"],
+                                "username": st.session_state["_temp_user"],
+                                "role": st.session_state["_temp_role"],
+                                "login_step": 1,
+                                "page": "chat"
+                            })
+                            st.rerun()
+                        else:
+                            st.error(f"⚠ Invalid access key for {sel_role}.")
+                    except Exception as e:
+                        st.error("⚠ Cannot reach API server for key validation.")
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Role keys hint table
-    st.markdown("""
-    <div style="max-width:540px;margin:1.5rem auto 0;">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:0.55rem;color:#1e1e32;
-        letter-spacing:0.2em;text-transform:uppercase;text-align:center;margin-bottom:0.75rem;">
-        Role Access Keys
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
-    """, unsafe_allow_html=True)
 
-    key_cards = ""
-    for role_name, key in ROLE_KEYS.items():
-        color = rc(role_name)
-        key_cards += f"""
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;
-          padding:0.55rem 0.75rem;border-top:2px solid {color}22;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;
-            color:var(--text);">{ri(role_name)} {role_name}</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;
-            color:{color};margin-top:3px;letter-spacing:0.1em;">{key}</div>
-        </div>"""
-    st.markdown(key_cards + "</div></div>", unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════
@@ -778,14 +761,19 @@ elif st.session_state["page"] == "upload":
     col1,col2=st.columns([1.5,1])
     with col1:
         department=st.selectbox("Target Department",dept_options)
-        uploaded_file=st.file_uploader("Drop document here",type=["md","txt","csv"])
+        uploaded_file=st.file_uploader("Drop document here",type=["md","txt","csv","pdf"])
         if uploaded_file and st.button("Upload Document →",type="primary"):
             try:
                 files={"file":(uploaded_file.name,uploaded_file.getvalue(),uploaded_file.type)}
                 r=requests.post(f"{API}/upload?department={department}",files=files,headers=hdrs())
                 if r.status_code==200:
                     st.success(f"✅ {r.json()['message']}")
-                    st.info("💡 Re-run ingestion pipeline to index the new document.")
+                    with st.spinner("Processing & indexing document..."):
+                        ir = requests.post(f"{API}/admin/ingest", headers=hdrs())
+                        if ir.status_code == 200:
+                            st.success(f"✅ {ir.json().get('message', 'Ingestion completed.')}")
+                        else:
+                            st.error(f"⚠️ {ir.json().get('detail', 'Ingestion failed.')}")
                 else: st.error(r.json().get("detail","Upload failed."))
             except Exception as e: st.error(f"Error: {e}")
     with col2:
@@ -799,7 +787,7 @@ elif st.session_state["page"] == "upload":
             font-weight:600;margin-bottom:0.6rem;">{ri(role)} {role}</div>
           <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:#2a2a40;line-height:2.2;">
             Depts: {', '.join(dept_options)}<br>
-            Formats: .md · .txt · .csv<br>Max: 10 MB
+            Formats: .md · .txt · .csv · .pdf<br>Max: 10 MB
           </div>
         </div>
         """, unsafe_allow_html=True)
