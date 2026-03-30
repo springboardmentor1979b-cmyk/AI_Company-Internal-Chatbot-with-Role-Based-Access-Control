@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+streamlit
+langchain
+langchain-community
+langchain-huggingface
+sentence-transformers
+chromadb
+SQLAlchemy
+PyJWT
+python-dotenv
+passlib[bcrypt]
+python-multipart
+pydantic
+pydantic-settings

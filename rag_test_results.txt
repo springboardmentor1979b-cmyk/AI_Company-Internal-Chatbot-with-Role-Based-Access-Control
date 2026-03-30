@@ -1,0 +1,73 @@
+--- Querying as Finance User ---
+Source: employee_handbook.md (general)
+Answer: **Warning: Your LLM API Provider returned an error:** ``
+
+However, I was still able to retrieve the following relevant information securely for your role:
+
+## Table of Contents
+1. [Welcome & Introduction](#welcome--introduction)
+2. [Employee Onboarding & Benefits](#employee-onboarding--benefits)
+3. [Leave Policies](#leave-policies)
+4. [Work Hours & Attendance](#work-hours--attendance)
+5. [Code of Conduct & Workplace Behavior](#code-of-conduct--workplace-behavior)
+6. [Health & Safety](#health--safety)
+7. [Compensation & Payroll](#compensation--payroll)
+8. [Reimbursement Policies](#reimbursement-policies)
+
+- **Flexible Work Arrangements**: Remote work, flexible hours (role-dependent).
+
+**Q: What if I forget to mark attendance?**  
+A: Inform HR within 24 hours; repeated lapses may lead to deduction or disciplinary action.
+
+**Q: How is overtime calculated?**  
+A: Paid at double the regular wage for hours beyond statutory limits, subject to manager approval.
+
+**Q: Can I work from home?**  
+A: Up to 2 days/week, subject to manager and business approval.
+
+---
+
+## Miscellaneous
+
+#### Company Benefits
+- **Group Health Insurance**: Family floater policy covering employee, spouse, and up to 2 children.
+- **Accident & Life Insurance**: Additional coverage for accidental death or disability.
+- **Wellness Programs**: Annual health check-ups, yoga/meditation sessions, mental health counseling.
+- **Employee Assistance Program (EAP)**: Confidential counseling and support for personal or professional issues.
+
+--- Querying as HR User ---
+Source: employee_handbook.md (general)
+Answer: **Warning: Your LLM API Provider returned an error:** ``
+
+However, I was still able to retrieve the following relevant information securely for your role:
+
+## Table of Contents
+1. [Welcome & Introduction](#welcome--introduction)
+2. [Employee Onboarding & Benefits](#employee-onboarding--benefits)
+3. [Leave Policies](#leave-policies)
+4. [Work Hours & Attendance](#work-hours--attendance)
+5. [Code of Conduct & Workplace Behavior](#code-of-conduct--workplace-behavior)
+6. [Health & Safety](#health--safety)
+7. [Compensation & Payroll](#compensation--payroll)
+8. [Reimbursement Policies](#reimbursement-policies)
+
+- **Flexible Work Arrangements**: Remote work, flexible hours (role-dependent).
+
+**Q: What if I forget to mark attendance?**  
+A: Inform HR within 24 hours; repeated lapses may lead to deduction or disciplinary action.
+
+**Q: How is overtime calculated?**  
+A: Paid at double the regular wage for hours beyond statutory limits, subject to manager approval.
+
+**Q: Can I work from home?**  
+A: Up to 2 days/week, subject to manager and business approval.
+
+---
+
+## Miscellaneous
+
+#### Company Benefits
+- **Group Health Insurance**: Family floater policy covering employee, spouse, and up to 2 children.
+- **Accident & Life Insurance**: Additional coverage for accidental death or disability.
+- **Wellness Programs**: Annual health check-ups, yoga/meditation sessions, mental health counseling.
+- **Employee Assistance Program (EAP)**: Confidential counseling and support for personal or professional issues.

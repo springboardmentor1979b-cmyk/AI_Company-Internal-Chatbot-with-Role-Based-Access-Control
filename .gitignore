@@ -1,0 +1,5 @@
+.env
+.vscode/
+*.db
+__pycache__/
+.git - Copy/
