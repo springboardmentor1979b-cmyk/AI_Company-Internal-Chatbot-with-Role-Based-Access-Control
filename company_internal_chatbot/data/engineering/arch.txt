@@ -1,2 +1,0 @@
-The core architecture migration to microservices is 80% complete and will finish in November.
-We use FastAPI and Streamlit for all internal AI applications.
