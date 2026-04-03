@@ -1,36 +1,33 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Float
-from sqlalchemy.sql import func
-from .database import Base
+from pydantic import BaseModel
 
-class User(Base):
-    __tablename__ = "users"
 
-    id         = Column(Integer, primary_key=True, index=True)
-    username   = Column(String, unique=True, index=True, nullable=False)
-    password   = Column(String, nullable=False)
-    role       = Column(String, nullable=False)
-    is_active  = Column(Boolean, default=True, nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
-class QueryLog(Base):
-    __tablename__ = "query_logs"
 
-    id         = Column(Integer, primary_key=True, index=True)
-    username   = Column(String, index=True, nullable=False)
-    role       = Column(String, nullable=False)
-    query      = Column(String, nullable=False)
-    status     = Column(String, nullable=False)
-    sources    = Column(String, nullable=True)
-    timestamp  = Column(DateTime, server_default=func.now())
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type:   str = "bearer"
+    username:     str
+    role:         str
+    department:   str
 
-class ChatHistory(Base):
-    __tablename__ = "chat_history"
 
-    id         = Column(Integer, primary_key=True, index=True)
-    username   = Column(String, index=True, nullable=False)
-    role       = Column(String, nullable=False)
-    query      = Column(String, nullable=False)
-    answer     = Column(String, nullable=False)
-    sources    = Column(String, nullable=True)
-    confidence = Column(Float, default=0.0)
-    timestamp  = Column(DateTime, server_default=func.now())
+class QueryRequest(BaseModel):
+    question: str
+    top_k:    int = 4
+
+
+class QueryResponse(BaseModel):
+    answer:      str
+    sources:     list[str]
+    chunks_used: int
+    role:        str
+
+
+class CreateUserRequest(BaseModel):
+    username:   str
+    password:   str
+    role:       str
+    department: str = ""
