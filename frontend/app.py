@@ -286,6 +286,9 @@ def show_login():
             Login credentials are assigned by IT.
         </div>
         """, unsafe_allow_html=True)
+        st.sidebar.markdown("---")
+        st.sidebar.caption("🚀 Infosys Springboard | Virtual Internship 6.0")
+        st.sidebar.caption("Final Week Prototype Submission")
 
     col1, col2, col3 = st.columns([1, 1.2, 1])
     with col2:
@@ -323,18 +326,53 @@ def show_login():
                     st.success(f"✅ Welcome, {username}! Redirecting…")
                     st.rerun()
 
-        # Demo accounts collapsed inside expander
-        st.markdown("<div style='height:0.75rem'></div>", unsafe_allow_html=True)
-        with st.expander("🛠️ Developer Access (Demo Accounts)"):
-            for user, pwd, dept, icon in DEMO_ACCOUNTS:
-                st.markdown(f"""
-                <div style="background:rgba(0,124,195,0.07);border:1px solid rgba(0,124,195,0.2);
-                border-radius:8px;padding:0.5rem 0.85rem;margin-bottom:0.4rem;
-                display:flex;justify-content:space-between;font-size:0.85rem">
-                    <span style="color:#007cc3">{icon} {dept}</span>
-                    <span style="color:rgba(255,255,255,0.65);font-family:monospace">{user} / {pwd}</span>
-                </div>
-                """, unsafe_allow_html=True)
+        # Demo accounts — clean reference table (no expander to avoid arrow glitch)
+        st.markdown("""
+        <div style="margin-top:1.25rem">
+            <p class="demo-text" style="margin-bottom:0.6rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;font-size:0.72rem">🛠️ Developer Reference Accounts</p>
+            <table style="width:100%;border-collapse:collapse;font-size:0.83rem">
+                <thead>
+                    <tr style="border-bottom:1px solid rgba(0,124,195,0.25)">
+                        <th style="text-align:left;padding:0.4rem 0.6rem;color:rgba(255,255,255,0.4);font-weight:600;font-size:0.72rem;text-transform:uppercase">Role</th>
+                        <th style="text-align:left;padding:0.4rem 0.6rem;color:rgba(255,255,255,0.4);font-weight:600;font-size:0.72rem;text-transform:uppercase">Username</th>
+                        <th style="text-align:left;padding:0.4rem 0.6rem;color:rgba(255,255,255,0.4);font-weight:600;font-size:0.72rem;text-transform:uppercase">Password</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+                        <td style="padding:0.4rem 0.6rem;color:#1E88E5">💼 Finance</td>
+                        <td style="padding:0.4rem 0.6rem;color:rgba(255,255,255,0.7);font-family:monospace">alice</td>
+                        <td style="padding:0.4rem 0.6rem;color:rgba(255,255,255,0.5);font-family:monospace">alice123</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+                        <td style="padding:0.4rem 0.6rem;color:#E91E63">📣 Marketing</td>
+                        <td style="padding:0.4rem 0.6rem;color:rgba(255,255,255,0.7);font-family:monospace">bob</td>
+                        <td style="padding:0.4rem 0.6rem;color:rgba(255,255,255,0.5);font-family:monospace">bob123</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+                        <td style="padding:0.4rem 0.6rem;color:#43A047">👥 HR</td>
+                        <td style="padding:0.4rem 0.6rem;color:rgba(255,255,255,0.7);font-family:monospace">carol</td>
+                        <td style="padding:0.4rem 0.6rem;color:rgba(255,255,255,0.5);font-family:monospace">carol123</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+                        <td style="padding:0.4rem 0.6rem;color:#FB8C00">⚙️ Engineering</td>
+                        <td style="padding:0.4rem 0.6rem;color:rgba(255,255,255,0.7);font-family:monospace">dave</td>
+                        <td style="padding:0.4rem 0.6rem;color:rgba(255,255,255,0.5);font-family:monospace">dave123</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+                        <td style="padding:0.4rem 0.6rem;color:#8E24AA">📖 Employees</td>
+                        <td style="padding:0.4rem 0.6rem;color:rgba(255,255,255,0.7);font-family:monospace">eve</td>
+                        <td style="padding:0.4rem 0.6rem;color:rgba(255,255,255,0.5);font-family:monospace">eve123</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.4rem 0.6rem;color:#007cc3">👑 C-Level</td>
+                        <td style="padding:0.4rem 0.6rem;color:rgba(255,255,255,0.7);font-family:monospace">frank</td>
+                        <td style="padding:0.4rem 0.6rem;color:rgba(255,255,255,0.5);font-family:monospace">frank123</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 # ── Chat page ─────────────────────────────────────────────────
