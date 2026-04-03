@@ -1,203 +1,313 @@
-# 🐉 Dragon Intel — RBAC Intelligence Platform
-
-> A secure, role-based enterprise chatbot with RAG pipeline, vector search, and local LLM.
-
-![Python](https://img.shields.io/badge/Python-3.11-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green)
-![ChromaDB](https://img.shields.io/badge/ChromaDB-0.4+-orange)
-![Tests](https://img.shields.io/badge/Tests-26%20passed-brightgreen)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
-
----
-
-## 📋 Overview
-
-Dragon Intel is a full-stack enterprise chatbot that enforces **Role-Based Access Control (RBAC)** on internal company documents. Users can only retrieve information relevant to their department role — enforced at both the vector search and application layers.
-
-### Key Features
-
-- 🔐 **JWT Authentication** — bcrypt-hashed passwords, OAuth2 Bearer tokens
-- 🛡️ **Multi-layer RBAC** — ChromaDB metadata filter + application-level guards
-- 🧠 **RAG Pipeline** — Semantic search (ChromaDB + all-MiniLM-L6-v2) + TinyLlama LLM
-- 🚫 **Smart Guards** — Off-topic, vague query, small talk, and role identity handlers
-- 📊 **C-Level Dashboard** — Full audit log, query stats, user analytics
-- 📁 **Document Upload** — Runtime document ingestion with department tagging
-- ✅ **26 Integration Tests** — Full pytest suite with 100% pass rate
-
----
-
-## 🏗️ Architecture
-
-```
-Browser (port 8502)
-    │
-    ▼
-FastAPI Backend (port 8000)
-    ├── /login     → JWT token
-    ├── /chat      → RAG pipeline (RBAC filtered)
-    ├── /history   → Chat history
-    ├── /dashboard → Analytics (C-Level only)
-    └── /upload    → Document ingestion
-         │
-         ├── SQLite (users, logs, history)
-         │
-         └── RAG Pipeline
-              ├── Guard checks (off-topic, vague, role)
-              ├── ChromaDB semantic search
-              ├── RBAC filter (is_authorized)
-              ├── Direct extraction (regex)
-              └── TinyLlama LLM fallback
-```
-
----
-
-## 🚀 Quick Start
-
-### 1. Clone & Install
-
-```powershell
-git clone https://github.com/yourusername/dragon-intel.git
-cd dragon-intel
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
-
-### 2. Initialize Database & Embeddings
-
-```powershell
-python -m backend.init_users
-python -m preprocessing.preprocess_all
-python -m vector_db.embedding_engine
-```
-
-### 3. Start the System
-
-```powershell
-# Terminal 1 — Backend
-uvicorn backend.main:app --reload --port 8000
-
-# Terminal 2 — Frontend
-cd frontend
-python -m http.server 8502
-```
-
-Open **http://localhost:8502** in your browser.
-
----
-
-## 👤 Demo Credentials
-
-| Username | Password | Role | Access Key |
-|---|---|---|---|
-| admin | admin123 | C-Level | CEO-2030 |
-| ceo_user | ceo123 | C-Level | CEO-2030 |
-| finance_user | finance123 | Finance | FIN-2030 |
-| hr_user | hr123 | HR | HRM-2030 |
-| marketing_user | marketing123 | Marketing | MKT-2030 |
-| engineering_user | engineering123 | Engineering | ENG-2030 |
-| employee_user | employee123 | Employee | EMP-2030 |
-
----
-
-## 🛡️ RBAC Access Map
-
-| Role | Finance | HR | Marketing | Engineering | Handbook |
-|---|---|---|---|---|---|
-| C-Level | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Finance | ✅ | ❌ | ❌ | ❌ | ❌ |
-| HR | ❌ | ✅ | ❌ | ❌ | ✅ |
-| Marketing | ❌ | ❌ | ✅ | ❌ | ❌ |
-| Engineering | ❌ | ❌ | ❌ | ✅ | ❌ |
-| Employee | ❌ | ❌ | ❌ | ❌ | ❌ |
+# 🤖 Company Internal Chatbot with RBAC
+## Complete Setup Guide — VS Code to GitHub
 
 ---
 
 ## 📁 Project Structure
 
 ```
-dragon-intel/
+company-chatbot/
+├── src/
+│   ├── config.py                        ← All settings (paths, roles, LLM)
+│   ├── data_processing/
+│   │   └── preprocessor.py              ← Clean, chunk, tag documents
+│   ├── vector_db/
+│   │   └── vector_store.py              ← ChromaDB wrapper + RBAC search
+│   ├── auth/
+│   │   └── auth_handler.py              ← JWT, bcrypt, SQLite users
+│   └── rag/
+│       └── pipeline.py                  ← RAG + HuggingFace LLM
 ├── backend/
-│   ├── main.py          # FastAPI app
-│   ├── auth.py          # Login endpoint
-│   ├── security.py      # JWT handling
-│   ├── audit.py         # Query logging
-│   ├── dashboard.py     # Analytics (C-Level)
-│   ├── database.py      # SQLAlchemy setup
-│   ├── models.py        # ORM models
-│   ├── schemas.py       # Pydantic schemas
-│   └── init_users.py    # DB seeding
+│   ├── main.py                          ← FastAPI app (REST API)
+│   └── models.py                        ← Pydantic schemas
 ├── frontend/
-│   └── index.html       # Full SPA
-├── preprocessing/
-│   ├── parser.py        # File reader
-│   ├── chunker.py       # Text chunking
-│   ├── metadata.py      # RBAC tagging
-│   ├── ingest.py        # Document processor
-│   └── preprocess_all.py
-├── vector_db/
-│   ├── search_engine.py # RBAC search
-│   └── embedding_engine.py
-├── data/
-│   ├── finance/
-│   ├── hr/
-│   ├── marketing/
-│   ├── engineering/
-│   └── general/
-├── rag_pipeline.py      # RAG + guards
-├── test_integration.py  # 26 pytest tests
-└── requirements.txt
+│   └── app.py                           ← Streamlit UI
+├── scripts/
+│   └── ingest_data.py                   ← ONE-TIME: clone data + index
+├── tests/
+│   └── test_rbac.py                     ← Pytest test suite
+├── requirements.txt
+├── .env.example
+├── .gitignore
+└── README.md
 ```
 
 ---
 
-## 🧪 Running Tests
+## ✅ STEP 1 — Install Prerequisites
 
-```powershell
-pip install pytest requests
-pytest test_integration.py -v
-# Expected: 26 passed
+Before anything, install these on your PC:
+
+| Tool | Download |
+|------|----------|
+| Python 3.10+ | https://python.org/downloads |
+| Git | https://git-scm.com/downloads |
+| VS Code | https://code.visualstudio.com |
+
+After installing Python, verify:
+```
+python --version    # should show 3.10+
+pip --version
+git --version
 ```
 
 ---
 
-## 📦 Requirements
+## ✅ STEP 2 — Open Project in VS Code
+
+1. Move the `company-chatbot` folder to wherever you keep projects  
+   (e.g., `C:\Users\YourName\Projects\company-chatbot`)
+
+2. Open VS Code → **File → Open Folder** → select `company-chatbot`
+
+3. Install the **Python extension** in VS Code  
+   (Extensions icon on left sidebar → search "Python" → Install)
+
+---
+
+## ✅ STEP 3 — Create Virtual Environment
+
+Open the **VS Code Terminal** (`Ctrl + `` ` `` ` or **Terminal → New Terminal**):
+
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# Mac / Linux
+python -m venv venv
+source venv/bin/activate
+```
+
+You should see `(venv)` at the start of your terminal prompt.
+
+**Select the venv interpreter in VS Code:**  
+`Ctrl+Shift+P` → "Python: Select Interpreter" → choose the one with `venv`
+
+---
+
+## ✅ STEP 4 — Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+This installs: FastAPI, Streamlit, ChromaDB, sentence-transformers, NLTK, bcrypt, PyJWT, SQLAlchemy, pandas.
+
+---
+
+## ✅ STEP 5 — Configure Environment
+
+```bash
+# Copy the example file
+cp .env.example .env
+```
+
+Open `.env` and fill in:
+
+```env
+JWT_SECRET_KEY=pick-any-long-random-string-here
+JWT_ALGORITHM=HS256
+JWT_EXPIRY_HOURS=8
+
+# Get a FREE token at: https://huggingface.co → Settings → Access Tokens
+HF_API_TOKEN=hf_xxxxxxxxxxxxxxxxxxxx
+
+DATA_FOLDER=Fintech-data
+CHROMA_DB_PATH=./chroma_db
+```
+
+> **HuggingFace token** is optional but recommended.  
+> Without it, the chatbot returns the raw retrieved text instead of a generated answer.  
+> Sign up free at huggingface.co → Settings → Access Tokens → New Token (read permission).
+
+---
+
+## ✅ STEP 6 — Run Data Ingestion (ONE TIME ONLY)
+
+```bash
+python scripts/ingest_data.py
+```
+
+This will:
+- Clone the GitHub data repo into `Fintech-data/`
+- Parse all `.md` and `.csv` files
+- Generate vector embeddings
+- Index everything into ChromaDB (saved in `chroma_db/`)
+- Create demo user accounts in `users.db`
+
+**Expected output:**
+```
+✅ Repository cloned successfully.
+✅ Total chunks loaded: 120
+✅ Indexing complete. Total in DB: 120
+✅ Demo users seeded (6 new accounts created).
+```
+
+---
+
+## ✅ STEP 7 — Start the Backend (FastAPI)
+
+Open a **new terminal** (keep it running):
+
+```bash
+python -m backend.main
+```
+
+You'll see:
+```
+INFO:     Uvicorn running on http://0.0.0.0:8000
+```
+
+Test it: open your browser → http://localhost:8000/docs  
+(Interactive API documentation — you can test endpoints here!)
+
+---
+
+## ✅ STEP 8 — Start the Frontend (Streamlit)
+
+Open **another new terminal**:
+
+```bash
+streamlit run frontend/app.py
+```
+
+Browser opens automatically at http://localhost:8501
+
+**Demo login credentials:**
+
+| Username | Password | Role |
+|----------|----------|------|
+| alice | alice123 | Finance |
+| bob | bob123 | Marketing |
+| carol | carol123 | HR |
+| dave | dave123 | Engineering |
+| eve | eve123 | Employees |
+| frank | frank123 | C-Level (all access) |
+
+---
+
+## ✅ STEP 9 — Run Tests
+
+```bash
+pip install pytest
+pytest tests/test_rbac.py -v
+```
+
+---
+
+## ✅ STEP 10 — Push to GitHub
+
+### 10a. Create a GitHub Repository
+
+1. Go to https://github.com → click **"New repository"**
+2. Name it: `company-chatbot-rbac`
+3. Set to **Private** (your project data is internal!)
+4. **Do NOT** check "Add README" (we have one)
+5. Click **Create repository**
+
+### 10b. Initialize Git and Push
+
+In your VS Code terminal (make sure you're in the project folder):
+
+```bash
+git init
+git add .
+git commit -m "Initial commit: Company chatbot with RBAC"
+git branch -M main
+git remote add origin https://github.com/YOUR-USERNAME/company-chatbot-rbac.git
+git push -u origin main
+```
+
+Replace `YOUR-USERNAME` with your GitHub username.
+
+### 10c. Add Your Mentor as Collaborator
+
+1. Go to your GitHub repo page
+2. Click **Settings** → **Collaborators** → **Add people**
+3. Enter your mentor's GitHub username or email
+4. They'll get an email invitation — they accept and can now push/pull
+
+---
+
+## 🔄 Daily Workflow (after first setup)
+
+Each time you work on the project:
+
+```bash
+# Activate virtual environment
+venv\Scripts\activate        # Windows
+source venv/bin/activate     # Mac/Linux
+
+# Terminal 1 — Backend
+python -m backend.main
+
+# Terminal 2 — Frontend
+streamlit run frontend/app.py
+```
+
+---
+
+## 🐛 Fixing the Colab Error (ChromaDB metadata bug)
+
+Your mentor's Colab code had this error because ChromaDB **does not accept Python lists** in metadata:
+
+```python
+# ❌ This FAILS in ChromaDB:
+metadatas=[{"roles": ["finance", "c_level"]}]
+
+# ✅ This WORKS — use comma-separated string:
+metadatas=[{"roles": "finance,c_level"}]
+```
+
+This is already fixed in `src/vector_db/vector_store.py` and `src/data_processing/preprocessor.py`.
+
+---
+
+## 📡 API Reference
+
+| Method | Endpoint | Auth Required | Description |
+|--------|----------|---------------|-------------|
+| POST | `/auth/login` | No | Get JWT token |
+| GET | `/auth/me` | Yes | Current user info |
+| POST | `/chat/query` | Yes | Ask a question (RAG) |
+| POST | `/admin/create-user` | Yes (C-Level) | Create new user |
+| GET | `/health` | No | Liveness check |
+
+Full interactive docs: http://localhost:8000/docs
+
+---
+
+## 🏗️ Architecture Summary
 
 ```
-fastapi
-uvicorn
-sqlalchemy
-passlib[bcrypt]
-python-jose[cryptography]
-python-multipart
-chromadb
-sentence-transformers
-transformers
-torch
-pytest
-requests
+User (Streamlit)
+     ↓  login
+FastAPI /auth/login  →  SQLite (users)  →  JWT token
+     ↓  query + JWT
+FastAPI /chat/query
+     ↓
+RBAC check (role from JWT)
+     ↓
+ChromaDB semantic search (role-filtered)
+     ↓
+HuggingFace LLM (generates answer)
+     ↓
+Response with answer + source citations
+     ↑  rendered in Streamlit chat
 ```
 
 ---
 
-## 📄 Documentation
+## 📦 Tech Stack
 
-| Document | Description |
-|---|---|
-| `docs/api_reference.docx` | Full API endpoint reference |
-| `docs/integration_tests.docx` | Test suite documentation |
-| `docs/system_architecture.docx` | System design & architecture |
-
----
-
-## 🔒 Security Notes
-
-- Change `SECRET_KEY` in `backend/security.py` before production deployment
-- Access keys in `index.html` are for demo only — use environment variables in production
-- TinyLlama runs locally — no data leaves your machine
-
----
-
-## 📝 License
-
-MIT License — see LICENSE file for details.
+| Component | Technology |
+|-----------|-----------|
+| Backend API | FastAPI + Uvicorn |
+| Frontend | Streamlit |
+| Vector DB | ChromaDB (persistent) |
+| Embeddings | sentence-transformers/all-MiniLM-L6-v2 |
+| LLM | HuggingFace (google/flan-t5-large) |
+| Auth | PyJWT + bcrypt |
+| User DB | SQLite + SQLAlchemy |
+| Version Control | Git + GitHub |
