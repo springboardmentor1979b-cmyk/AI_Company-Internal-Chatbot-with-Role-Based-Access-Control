@@ -13,7 +13,7 @@ import requests
 BACKEND_URL = "http://localhost:8000"
 
 st.set_page_config(
-    page_title="Company Internal Chatbot",
+    page_title="Infobot",
     page_icon="🤖",
     layout="wide",
 )
@@ -83,7 +83,7 @@ def role_badge(role: str) -> str:
 # ── Login page ────────────────────────────────────────────────
 
 def show_login():
-    st.title("🔐 Company Internal Chatbot")
+    st.title("🔐 Infobot")
     st.markdown("#### Login to your account")
 
     with st.form("login_form"):
@@ -144,7 +144,7 @@ def show_chat():
             st.session_state.token = None
             st.rerun()
 
-    st.title("🤖 Company Internal Chatbot")
+    st.title("🤖 Infobot")
     st.caption(f"Role: **{st.session_state.role}** | You can only access documents permitted for your role.")
 
     # Render history

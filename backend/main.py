@@ -26,7 +26,7 @@ from src.auth.auth_handler import authenticate, create_token, decode_token, crea
 from src.rag.pipeline import answer_query
 
 app = FastAPI(
-    title="Company Internal Chatbot",
+    title="Infobot",
     description="RAG-powered chatbot with Role-Based Access Control",
     version="1.0.0",
 )
