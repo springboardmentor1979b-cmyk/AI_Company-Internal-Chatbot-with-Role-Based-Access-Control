@@ -12,7 +12,7 @@ Endpoints:
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 import jwt
@@ -27,6 +27,11 @@ from src.auth.auth_handler import (
     log_query, get_dashboard_metrics, get_user_history
 )
 from src.rag.pipeline import answer_query
+from src.config import DATA_FOLDER
+from src.data_processing.preprocessor import parse_markdown, parse_csv
+from src.vector_db.vector_store import get_store
+import shutil
+import os
 
 app = FastAPI(
     title="Nexus Intel API",
@@ -107,6 +112,50 @@ def query(req: QueryRequest, current_user: dict = Depends(get_current_user)):
         chunks_used=result["chunks_used"],
         role=result["role"],
     )
+
+@app.post("/chat/upload")
+def upload_document(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    role = current_user.get("role", "employees")
+    
+    # Map roles to their specific folders
+    folder_mapping = {
+        "finance": "Finance",
+        "hr": "HR",
+        "engineering": "engineering",
+        "marketing": "marketing",
+        "employees": "general",
+        "c_level": "general"
+    }
+    
+    # Determine save path securely based on user role
+    target_folder = folder_mapping.get(role, "general")
+    save_dir = os.path.join(DATA_FOLDER, target_folder)
+    
+    os.makedirs(save_dir, exist_ok=True)
+    file_path = os.path.join(save_dir, file.filename)
+    
+    # Save file
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+        
+    # Ingest file immediately
+    try:
+        if file.filename.endswith(".md"):
+            records = parse_markdown(file_path)
+        elif file.filename.endswith(".csv"):
+            records = parse_csv(file_path)
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported file format. Please upload .md or .csv.")
+            
+        store = get_store()
+        store.add_documents(records)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to ingest file into AI DB: {str(e)}")
+        
+    return {"message": f"Successfully uploaded and ingested {file.filename} securely into {target_folder} context.", "filename": file.filename}
 
 @app.get("/chat/history")
 def history(current_user: dict = Depends(get_current_user)):

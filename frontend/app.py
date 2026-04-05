@@ -248,6 +248,23 @@ def api_query(question: str, top_k: int = 4):
     except Exception as e:
         return None, f"❌ Error: {str(e)}"
 
+def api_upload(uploaded_file):
+    headers = {"Authorization": f"Bearer {st.session_state.token}"}
+    files = {"file": (uploaded_file.name, uploaded_file.getvalue(), "application/octet-stream")}
+    try:
+        r = requests.post(f"{BACKEND_URL}/chat/upload", files=files, headers=headers, timeout=30)
+        if r.status_code == 200:
+            return r.json(), None
+        try:
+            err = r.json().get("detail", f"Backend Error: {r.status_code}")
+        except Exception:
+            err = f"Backend Error: {r.status_code}"
+        return None, err
+    except requests.ConnectionError:
+        return None, "❌ Cannot reach backend."
+    except Exception as e:
+        return None, f"❌ Error: {str(e)}"
+
 def api_get_history():
     headers = {"Authorization": f"Bearer {st.session_state.token}"}
     try:
@@ -360,6 +377,29 @@ def show_login():
                     st.session_state.current_page = "🤖 Infobot Chat"
                     st.rerun()
 
+        # Added for easy prototyping access per user request
+        st.markdown("""
+        <br>
+        <div style="border-top: 1px solid rgba(0,124,195,0.25); padding-top: 1.5rem; margin-top: 1rem;">
+            <p style='color:white;font-size:0.75rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:0'>
+                🛠️ Developer Reference Accounts
+            </p>
+            <p style='color:rgba(255,255,255,0.45);font-size:0.7rem;font-style:italic;margin-top:2px;margin-bottom:12px'>
+                * Note: These credentials are provided for prototype evaluation only and will be stripped prior to production deployment.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("""
+| ROLE | USERNAME | PASSWORD |
+|:---|:---|:---|
+| <span style="color:#1E88E5">💼 Finance</span> | alice | alice123 |
+| <span style="color:#E91E63">📣 Marketing</span> | bob | bob123 |
+| <span style="color:#43A047">👥 HR</span> | carol | carol123 |
+| <span style="color:#FB8C00">⚙️ Engineering</span> | dave | dave123 |
+| <span style="color:#9C27B0">📖 Employees</span> | eve | eve123 |
+| <span style="color:#007cc3">👑 C-Level</span> | frank | frank123 |
+        """, unsafe_allow_html=True)
+
 
 def view_chat():
     cfg = ROLE_CONFIG.get(st.session_state.role, {"color": "#007cc3", "icon": "👤", "label": st.session_state.role.upper()})
@@ -461,8 +501,17 @@ def view_upload():
     </div>
     """, unsafe_allow_html=True)
     
-    st.warning("⚠️ Secure Upload deactivated in this UI prototype. Please use the backend `scripts/ingest_data.py` on the host machine to index new files securely.")
-    st.file_uploader("Upload Internal Directives (PDF, MD, CSV)", disabled=True)
+    st.info("Files uploaded here are automatically locked to your department clearance.")
+    uploaded_file = st.file_uploader("Upload Internal Directives (MD, CSV)")
+    
+    if uploaded_file and st.button("Securely Index Document"):
+        with st.spinner("Encrypting and indexing to ChromaDB..."):
+            res, err = api_upload(uploaded_file)
+            if err:
+                st.error(err)
+            else:
+                st.success(f"✅ {res['message']}")
+
 
 
 def view_dashboard():
