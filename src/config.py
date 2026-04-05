@@ -3,6 +3,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Force HuggingFace cache to local directory to bypass Windows permission constraints
+os.environ["HF_HOME"] = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".hf_cache")
+
 # ── JWT ──────────────────────────────────────────────
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-me-in-production")
 JWT_ALGORITHM  = os.getenv("JWT_ALGORITHM", "HS256")
