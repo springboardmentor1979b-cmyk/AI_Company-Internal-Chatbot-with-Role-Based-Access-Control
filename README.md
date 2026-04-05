@@ -183,7 +183,47 @@ Browser opens automatically at http://localhost:8501
 | carol | carol123 | HR |
 | dave | dave123 | Engineering |
 | eve | eve123 | Employees |
-| frank | frank123 | C-Level (all access) |
+| 👑 frank | frank123 | C-Level (all access) |
+
+---
+
+## 🧪 Evaluator Testing Guide (RBAC Validation)
+
+To completely verify the strict Role-Based Access Control, evaluators should log in using different accounts and test cross-departmental queries. 
+
+Here are exact test cases to validate the security model:
+
+### 1. The "Finance Exclusive" Test
+**Log in as `alice` (Finance)**:
+- **Ask:** *"What are the Q4 earnings or financial metrics?"*
+- **Expected Result:** Alice **receives** the detailed financial answer (Access Granted).
+- **Ask:** *"What is the current marketing campaign strategy?"*
+- **Expected Result:** Alice receives a generic fallback answer (e.g., "I could not find an answer in your authorized documents"). She is **BLOCKED** from Marketing data.
+
+### 2. The "Marketing Exclusive" Test
+**Log in as `bob` (Marketing)**:
+- **Ask:** *"What is our social media marketing strategy?"*
+- **Expected Result:** Bob **receives** the marketing strategy details.
+- **Ask:** *"What are the Q4 earnings?"*
+- **Expected Result:** Bob is **BLOCKED** from Finance data and cannot see the earnings.
+
+### 3. The "General Employee" Test
+**Log in as `eve` (Employees)**:
+- **Ask:** *"What is the general company holiday schedule?"*
+- **Expected Result:** Eve **receives** this information because it is publicly tagged for all `employees`.
+- **Ask:** *"What are the engineering backend architectures?"*
+- **Expected Result:** Eve is **BLOCKED** from Engineering documentation.
+
+### 4. The "C-Level Superuser" Test
+**Log in as `frank` (C-Level)**:
+- **Ask:** *"What are the Q4 earnings AND the marketing strategy?"*
+- **Expected Result:** Frank **receives** answers to both. C-Level bypasses all departmental locks and has global workspace access.
+
+### 5. Testing the Secure File Ingestion Prototype
+- Log in as any department (e.g., `bob` for Marketing).
+- Navigate to the **Upload Documents** tab.
+- Upload a new dummy `.md` or `.csv` file.
+- **Result:** The Python backend immediately parses and securely indexes it into ChromaDB. Log out and try to access its internal contents using an account from a *different* department to prove the file is securely locked to Marketing!
 
 ---
 
