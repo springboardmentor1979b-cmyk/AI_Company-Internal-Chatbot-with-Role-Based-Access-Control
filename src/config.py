@@ -4,7 +4,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Force HuggingFace cache to local directory to bypass Windows permission constraints
-os.environ["HF_HOME"] = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".hf_cache")
+local_cache = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".hf_cache")
+os.environ["HF_HOME"] = local_cache
+os.environ["TRANSFORMERS_CACHE"] = local_cache
+os.environ["SENTENCE_TRANSFORMERS_HOME"] = local_cache
 
 # ── JWT ──────────────────────────────────────────────
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-me-in-production")
@@ -23,7 +26,7 @@ COLLECTION_NAME = "company_docs"
 
 # ── HuggingFace ───────────────────────────────────────
 HF_API_TOKEN = os.getenv("HF_API_TOKEN", "")
-HF_MODEL     = "google/flan-t5-large"   # free & small enough
+HF_MODEL     = "mistralai/Mistral-7B-Instruct-v0.2"   # robust free-inference chat model
 HF_API_URL   = f"https://api-inference.huggingface.co/models/{HF_MODEL}"
 
 # ── Role → document mapping ───────────────────────────

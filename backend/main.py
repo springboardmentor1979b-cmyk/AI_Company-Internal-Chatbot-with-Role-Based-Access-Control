@@ -22,13 +22,16 @@ from backend.models import (
     QueryRequest, QueryResponse,
     CreateUserRequest,
 )
-from src.auth.auth_handler import authenticate, create_token, decode_token, create_user
+from src.auth.auth_handler import (
+    authenticate, create_token, decode_token, create_user,
+    log_query, get_dashboard_metrics, get_user_history
+)
 from src.rag.pipeline import answer_query
 
 app = FastAPI(
-    title="Infobot",
-    description="RAG-powered chatbot with Role-Based Access Control",
-    version="1.0.0",
+    title="Nexus Intel API",
+    description="Cyberpunk RAG backend with RBAC and telemetry",
+    version="2.0.0",
 )
 
 app.add_middleware(
@@ -54,9 +57,9 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         raise HTTPException(status_code=401, detail="Invalid token.")
 
 
-def require_c_level(user: dict = Depends(get_current_user)) -> dict:
-    if user.get("role") != "c_level":
-        raise HTTPException(status_code=403, detail="C-Level access required.")
+def require_admin(user: dict = Depends(get_current_user)) -> dict:
+    if user.get("role") not in ["c_level", "admin"]:
+        raise HTTPException(status_code=403, detail="Administrator/C-Level access required.")
     return user
 
 
@@ -64,14 +67,14 @@ def require_c_level(user: dict = Depends(get_current_user)) -> dict:
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "company-chatbot"}
+    return {"status": "ok", "service": "nexus-intel-api"}
 
 
 @app.post("/auth/login", response_model=TokenResponse)
 def login(req: LoginRequest):
     user = authenticate(req.username, req.password)
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid username or password.")
+        raise HTTPException(status_code=401, detail="INVALID CREDENTIALS")
     token = create_token(user)
     return TokenResponse(
         access_token=token,
@@ -89,6 +92,10 @@ def me(current_user: dict = Depends(get_current_user)):
 @app.post("/chat/query", response_model=QueryResponse)
 def query(req: QueryRequest, current_user: dict = Depends(get_current_user)):
     role = current_user.get("role", "employees")
+    
+    # ── LOG TELEMETRY FOR DASHBOARD ──
+    log_query(current_user["username"], role, req.question)
+    
     result = answer_query(
         question=req.question,
         user_role=role,
@@ -101,16 +108,27 @@ def query(req: QueryRequest, current_user: dict = Depends(get_current_user)):
         role=result["role"],
     )
 
+@app.get("/chat/history")
+def history(current_user: dict = Depends(get_current_user)):
+    """Fetch the query history for the currently authenticated user."""
+    history_records = get_user_history(current_user["username"])
+    return {"history": history_records}
+
+@app.get("/admin/dashboard")
+def dashboard(current_user: dict = Depends(get_current_user)):
+    """Fetch total aggregated metrics for the Analytics UI. Automatically filters by user role."""
+    return get_dashboard_metrics(role_filter=current_user.get("role", "employees"))
+
 
 @app.post("/admin/create-user", status_code=201)
 def admin_create_user(
     req: CreateUserRequest,
-    _admin: dict = Depends(require_c_level),
+    _admin: dict = Depends(require_admin),
 ):
     ok = create_user(req.username, req.password, req.role, req.department)
     if not ok:
-        raise HTTPException(status_code=409, detail=f"User '{req.username}' already exists.")
-    return {"message": f"User '{req.username}' created with role '{req.role}'."}
+        raise HTTPException(status_code=409, detail=f"USER {req.username} ALREADY EXISTS")
+    return {"message": f"USER {req.username} ALLOCATED: {req.role}"}
 
 
 # ── Run directly ──────────────────────────────────────────────
