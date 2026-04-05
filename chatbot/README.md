@@ -274,36 +274,9 @@ Modify `backend/rag.py` to:
 - [ ] Implement rate limiting
 - [ ] Set up logging/monitoring
 
-## Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Make changes and test: `pytest tests/ -v`
-4. Commit with clear messages: `git commit -m "Add: your feature description"`
-5. Push to branch: `git push origin feature/your-feature`
-6. Submit a Pull Request with description
-
-### Code Standards
-- Follow PEP 8 style guide
-- Write tests for new features
-- Update documentation
-- Keep commits atomic and descriptive
-
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
-
-## Support
-
-- 📖 **Documentation**: Check README and code comments
-- 🐛 **Issues**: [GitHub Issues](https://github.com/yourusername/nexusai/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/nexusai/discussions)
-
-## Authors
-
-- Your Name ([@yourgithub](https://github.com/yourgithub))
 
 ## Acknowledgments
 
