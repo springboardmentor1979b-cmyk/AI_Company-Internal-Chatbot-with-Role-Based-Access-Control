@@ -1,4 +1,4 @@
-# Company Internal Chatbot (RAG + RBAC) - Project Context & Setup
+# Infobot (RAG + RBAC) - Project Context & Setup
 
 ## Overview
 

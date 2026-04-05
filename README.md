@@ -1,4 +1,4 @@
-# 🤖 Company Internal Chatbot with RBAC
+# 🤖 Infobot with RBAC
 ## Complete Setup Guide — VS Code to GitHub
 
 ---

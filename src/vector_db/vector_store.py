@@ -74,8 +74,9 @@ class VectorStore:
         Semantic search filtered by RBAC.
         Returns list of {document, source, roles, distance}.
         """
-        # Retrieve more candidates then filter — improves recall
-        n_candidates = min(top_k * 4, self._collection.count() or 1)
+        # Look at the top results only to prevent "desperate" context-bleeding
+        n_candidates = min(self._collection.count(), top_k * 3) or 1
+        user_safe = user_role.lower().strip()
 
         results = self._collection.query(
             query_embeddings=self._model.encode([query]).tolist(),
@@ -89,17 +90,29 @@ class VectorStore:
             results["distances"][0],
         )
 
+        print(f"\n🔍 SECURITY AUDIT: User '{user_safe}' is querying... (Top {n_candidates} candidates)")
         filtered = []
         for doc, meta, dist in zip(docs, metas, dists):
             allowed_roles = meta.get("roles", "").split(",")
-            # c_level can access everything; others need an explicit match
-            if user_role in allowed_roles or "c_level" == user_role:
+            source = meta.get("source", "unknown")
+            
+            # Super-user check
+            is_super = user_safe in ["c_level", "admin"]
+            
+            # Match check
+            is_authorized = (user_safe in allowed_roles) or ("employees" in allowed_roles) or is_super
+            
+            if is_authorized:
+                print(f"  ✅ [ALLOWED] Source: {source} (Roles: {allowed_roles})")
                 filtered.append({
                     "document": doc,
-                    "source":   meta.get("source", "unknown"),
+                    "source":   source,
                     "roles":    allowed_roles,
-                    "score":    round(1 - dist, 4),   # cosine similarity
+                    "score":    round(1 - dist, 4),
                 })
+            else:
+                print(f"  ❌ [BLOCKED] Source: {source} (Roles: {allowed_roles})")
+
             if len(filtered) >= top_k:
                 break
 

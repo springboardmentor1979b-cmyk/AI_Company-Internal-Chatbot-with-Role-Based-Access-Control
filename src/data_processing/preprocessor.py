@@ -49,31 +49,43 @@ def chunk_text(text: str, chunk_size: int = CHUNK_SIZE) -> list[str]:
 # Metadata
 # ────────────────────────────────────────────────────────────────
 
-def get_roles_for_file(file_name: str) -> str:
+def get_roles_for_file(filepath: str) -> str:
     """
     Returns comma-separated roles that can access this file.
     ChromaDB metadata does NOT support lists → use a string.
     """
-    file_lower = file_name.lower()
+    filepath_lower = filepath.lower().replace("\\", "/")
+    file_name = os.path.basename(filepath_lower)
     roles = []
-    for role, files in ROLE_MAPPING.items():
-        if files == "all":
+    
+    for role, resources in ROLE_MAPPING.items():
+        if role == "c_level": 
+            continue
+            
+        # 1. Path-based matching (e.g., if in /hr/ folder)
+        if f"/{role}/" in filepath_lower:
             roles.append(role)
-        elif any(f.lower() == file_lower for f in files):
-            roles.append(role)
+            
+        # 2. Name-based matching (if filename is explicitly mapped to a role)
+        if isinstance(resources, list) and file_name in resources:
+            if role not in roles:
+                roles.append(role)
 
-    # Every employee-accessible doc should include 'employees' implicitly
-    # if no role matched, fall back to c_level only
+    # Also check if it's in a 'general' folder or marked as employee-wide
+    if "/general/" in filepath_lower or file_name in ROLE_MAPPING.get("employees", []):
+        if "employees" not in roles:
+            roles.append("employees")
+
     if not roles:
         roles = ["c_level"]
 
-    return ",".join(roles)
+    return ",".join(list(set(roles)))
 
 
-def build_metadata(file_name: str, chunk: str) -> dict:
+def build_metadata(filepath: str, file_name: str, chunk: str) -> dict:
     return {
         "source":     file_name,
-        "roles":      get_roles_for_file(file_name),   # string, not list
+        "roles":      get_roles_for_file(filepath),   # string, not list
         "chunk_text": chunk[:200],                      # preview only
     }
 
@@ -93,7 +105,7 @@ def parse_markdown(filepath: str) -> list[dict]:
         for chunk in chunk_text(cleaned):
             records.append({
                 "text":     chunk,
-                "metadata": build_metadata(file_name, chunk),
+                "metadata": build_metadata(filepath, file_name, chunk),
             })
     except Exception as e:
         print(f"  [WARN] Skipping {filepath}: {e}")
@@ -112,7 +124,7 @@ def parse_csv(filepath: str) -> list[dict]:
             for chunk in chunk_text(cleaned):
                 records.append({
                     "text":     chunk,
-                    "metadata": build_metadata(file_name, chunk),
+                    "metadata": build_metadata(filepath, file_name, chunk),
                 })
     except Exception as e:
         print(f"  [WARN] Skipping {filepath}: {e}")
